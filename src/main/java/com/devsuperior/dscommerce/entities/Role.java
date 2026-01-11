@@ -30,7 +30,7 @@ public class Role implements GrantedAuthority {
     public void setId(Long id) {
         this.id = id;
     }
-
+    @Override
     public String getAuthority() {
         return authority;
     }
@@ -38,8 +38,6 @@ public class Role implements GrantedAuthority {
     public void setAuthority(String authority) {
         this.authority = authority;
     }
-
-
 
     @Override
     public boolean equals(Object o) {
