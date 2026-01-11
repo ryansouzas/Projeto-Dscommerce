@@ -69,42 +69,23 @@ public class AuthorizationServerConfig {
 
 	@Bean
 	@Order(2)
-    public SecurityFilterChain asSecurityFilterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain asSecurityFilterChain(HttpSecurity http) throws Exception {
 
-        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
-                new OAuth2AuthorizationServerConfigurer();
+		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 
-        http
-                .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
-                .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
-                .csrf(csrf -> csrf.ignoringRequestMatchers(
-                        authorizationServerConfigurer.getEndpointsMatcher()))
-                .cors(Customizer.withDefaults())
-                .apply(authorizationServerConfigurer);
+		// @formatter:off
+		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+			.tokenEndpoint(tokenEndpoint -> tokenEndpoint
+				.accessTokenRequestConverter(new CustomPasswordAuthenticationConverter())
+				.authenticationProvider(new CustomPasswordAuthenticationProvider(authorizationService(), tokenGenerator(), userDetailsService, passwordEncoder())));
 
-        http
-                .getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-                .tokenEndpoint(tokenEndpoint -> tokenEndpoint
-                        .accessTokenRequestConverter(
-                                new CustomPasswordAuthenticationConverter()
-                        )
-                        .authenticationProvider(
-                                new CustomPasswordAuthenticationProvider(
-                                        authorizationService(),
-                                        tokenGenerator(),
-                                        userDetailsService,
-                                        passwordEncoder()
-                                )
-                        )
-                );
+		http.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(Customizer.withDefaults()));
+		// @formatter:on
 
-        http.oauth2ResourceServer(oauth2 -> oauth2.jwt());
+		return http.build();
+	}
 
-        return http.build();
-    }
-
-
-    @Bean
+	@Bean
 	public OAuth2AuthorizationService authorizationService() {
 		return new InMemoryOAuth2AuthorizationService();
 	}
