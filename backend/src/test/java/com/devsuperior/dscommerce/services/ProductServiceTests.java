@@ -46,6 +46,7 @@ public class ProductServiceTests {
     void setUp() throws Exception{
         existingProductId= 1L;
         nonExistingProductId = 2L;
+        dependentProductId = 3L;
         productName = "Playstation 5 ";
 
         product = ProductFactory.createProduct(productName);
