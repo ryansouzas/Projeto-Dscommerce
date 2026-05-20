@@ -54,6 +54,8 @@ public class OrderService {
             OrderItem item = new OrderItem(order, product, itemDto.getQuantity(), product.getPrice());
             order.getItems().add(item);
         }
+
+        //order = repository.save(order);
         repository.save(order);
         orderItemRepository.saveAll(order.getItems());
 
