@@ -2,6 +2,7 @@ package com.devsuperior.dscommerce.controllers.it;
 
 
 import com.devsuperior.dscommerce.dto.ProductDTO;
+import com.devsuperior.dscommerce.entities.Category;
 import com.devsuperior.dscommerce.entities.Product;
 import com.devsuperior.dscommerce.tests.TokenUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -34,7 +36,9 @@ public class ProductControllerIT {
 
     private String clientUsername, clientPassword, adminUsername, adminPassword;
 
+    @Autowired
     private TokenUtil tokenUtil;
+
     private String clientToken, adminToken, invalidToken;
 
     private Product product;
@@ -47,6 +51,11 @@ public class ProductControllerIT {
         adminUsername = "alex@gmail.com";
         adminPassword = "123456";
         productName = "Macbook";
+
+        Category category = new Category(2L, "Eletrônicos");
+        product = new Product(null, "Playstation 5", "Top de linha", 3999.90, "https://raw.githubusercontent.com/devsuperior/dscatalog-resources/master/backend/img/4-big.jpg");
+        product.getCategories().add(category);
+        productDTO = new ProductDTO(product);
 
         clientToken = tokenUtil.obtainAccessToken(mockMvc, clientUsername, clientPassword);
         adminToken = tokenUtil.obtainAccessToken(mockMvc, adminUsername, adminPassword);
@@ -88,7 +97,16 @@ public class ProductControllerIT {
                 .perform(post("/products")
                         .header("Authorization", "Bearer " + adminToken)
                         .content(jsonBody)
-                        .accept(MediaType.APPLICATION_JSON));
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                        .andDo(MockMvcResultHandlers.print());
+
+        result.andExpect(status().isCreated());
+        result.andExpect(jsonPath("$.id").exists());
+        result.andExpect(jsonPath("$.name").value(productDTO.getName()));
+        result.andExpect(jsonPath("$.price").value(productDTO.getPrice()));
+        result.andExpect(jsonPath("$.imgUrl").value(productDTO.getImgUrl()));
+
 
 
     }
