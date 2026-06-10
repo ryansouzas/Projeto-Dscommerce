@@ -29,19 +29,18 @@ public class ProductControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
-    private String productName;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    private String clientUsername, clientPassword, adminUsername, adminPassword;
-
     @Autowired
     private TokenUtil tokenUtil;
 
-    private Long existingProductId , nonExistingProductId, dependentProductId;
     private String clientToken, adminToken, invalidToken;
+    private String clientUsername, clientPassword, adminUsername, adminPassword;
 
+    private Long existingProductId , nonExistingProductId, dependentProductId;
+    private String productName;
     private Product product;
     private ProductDTO productDTO;
 
