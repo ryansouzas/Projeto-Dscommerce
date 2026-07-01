@@ -40,16 +40,18 @@ public class ResourceServerConfig {
 		return http.build();
 	}
 
-	@Bean
-	@Order(3)
-	public SecurityFilterChain rsSecurityFilterChain(HttpSecurity http) throws Exception {
+    @Bean
+    @Order(3)
+    public SecurityFilterChain rsSecurityFilterChain(
+            HttpSecurity http,
+            CorsConfigurationSource corsConfigurationSource) throws Exception {
 
-		http.csrf(csrf -> csrf.disable());
-		http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
-		http.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(Customizer.withDefaults()));
-		http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
-		return http.build();
-	}
+        http.csrf(csrf -> csrf.disable());
+        http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
+        http.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(Customizer.withDefaults()));
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource));
+        return http.build();
+    }
 
 	@Bean
 	public JwtAuthenticationConverter jwtAuthenticationConverter() {
@@ -62,21 +64,7 @@ public class ResourceServerConfig {
 		return jwtAuthenticationConverter;
 	}
 
-	@Bean
-	CorsConfigurationSource corsConfigurationSource() {
 
-		String[] origins = corsOrigins.split(",");
-
-		CorsConfiguration corsConfig = new CorsConfiguration();
-		corsConfig.setAllowedOriginPatterns(Arrays.asList(origins));
-		corsConfig.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "PATCH"));
-		corsConfig.setAllowCredentials(true);
-		corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", corsConfig);
-		return source;
-	}
 
 
 }

@@ -51,6 +51,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 public class AuthorizationServerConfig {
@@ -67,23 +68,25 @@ public class AuthorizationServerConfig {
 	@Autowired
 	private UserDetailsService userDetailsService;
 
-	@Bean
-	@Order(2)
-	public SecurityFilterChain asSecurityFilterChain(HttpSecurity http) throws Exception {
+    @Bean
+    @Order(2)
+    public SecurityFilterChain asSecurityFilterChain(
+            HttpSecurity http,
+            CorsConfigurationSource corsConfigurationSource) throws Exception {
 
-		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 
-		// @formatter:off
-		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-			.tokenEndpoint(tokenEndpoint -> tokenEndpoint
-				.accessTokenRequestConverter(new CustomPasswordAuthenticationConverter())
-				.authenticationProvider(new CustomPasswordAuthenticationProvider(authorizationService(), tokenGenerator(), userDetailsService, passwordEncoder())));
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .tokenEndpoint(tokenEndpoint -> tokenEndpoint
+                        .accessTokenRequestConverter(new CustomPasswordAuthenticationConverter())
+                        .authenticationProvider(new CustomPasswordAuthenticationProvider(
+                                authorizationService(), tokenGenerator(), userDetailsService, passwordEncoder())));
 
-		http.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(Customizer.withDefaults()));
-		// @formatter:on
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource));
+        http.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(Customizer.withDefaults()));
 
-		return http.build();
-	}
+        return http.build();
+    }
 
 	@Bean
 	public OAuth2AuthorizationService authorizationService() {
